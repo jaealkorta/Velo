@@ -44,7 +44,7 @@ cd Velo
 ./test.sh                # previsualiza el tema sin instalar nada
 ./install.sh --simular   # muestra lo que haría el instalador, sin ejecutar nada
 ./install.sh             # instala y activa el tema
-./gui/instalar_app.sh    # opcional: añade la aplicación al menú de aplicaciones
+./instalar_app.sh        # opcional: añade la aplicación al menú de aplicaciones
 ```
 
 El instalador añade los paquetes que falten, copia el tema a `/usr/share/sddm/themes/velo` y lo activa mediante un archivo independiente, `/etc/sddm.conf.d/velo.conf`, sin modificar la configuración propia de KDE.

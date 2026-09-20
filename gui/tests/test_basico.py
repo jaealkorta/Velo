@@ -203,7 +203,7 @@ def _tema_falso(raiz):
     (raiz / 'docs' / 'img' / 'captura.jpg').write_text('x')
     (raiz / 'gui').mkdir()
     (raiz / 'gui' / 'velo_gui.py').write_text('x')
-    for nombre in ('install.sh', 'test.sh', 'velo-gui', '.gitignore'):
+    for nombre in ('install.sh', 'instalar_app.sh', 'test.sh', 'velo-gui', '.gitignore'):
         (raiz / nombre).write_text('x')
     (raiz / 'components').mkdir()
     (raiz / 'components' / '__pycache__').mkdir()
@@ -309,14 +309,14 @@ def probar_instalador_sistema():
 
 
 def probar_instalador_menu():
-    real = Path(__file__).resolve().parents[1] / 'instalar_app.sh'
+    real = Path(__file__).resolve().parents[2] / 'instalar_app.sh'
     with tempfile.TemporaryDirectory() as d:
         entorno = dict(os.environ, HOME=d, XDG_DATA_HOME=d + '/datos')
         r = subprocess.run([str(real)], env=entorno, capture_output=True, text=True)
         assert r.returncode == 0, r.stderr
         lanzador = Path(d) / 'datos' / 'applications' / 'velo.desktop'
         texto = lanzador.read_text(encoding='utf-8')
-        tema = real.parents[1]
+        tema = real.parent
         assert f'Exec="{tema}/velo-gui"' in texto and 'Icon=velo' in texto and 'StartupWMClass=velo-gui' in texto
         assert (Path(d) / 'datos' / 'icons' / 'hicolor' / 'scalable' / 'apps' / 'velo.svg').exists()
         assert (tema / 'velo-gui').exists() and os.access(tema / 'velo-gui', os.X_OK)

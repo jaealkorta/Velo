@@ -10,7 +10,7 @@
 set -euo pipefail
 
 AQUI=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-TEMA=$(dirname "$AQUI")
+TEMA=$AQUI
 DATOS=${XDG_DATA_HOME:-$HOME/.local/share}
 LANZADOR="$DATOS/applications/velo.desktop"
 ICONO="$DATOS/icons/hicolor/scalable/apps/velo.svg"
@@ -33,7 +33,7 @@ if [[ "${1:-}" == "--quitar" ]]; then
 fi
 
 mkdir -p "$DATOS/applications" "$(dirname "$ICONO")"
-install -m 644 "$AQUI/velo.svg" "$ICONO"
+install -m 644 "$AQUI/gui/velo.svg" "$ICONO"
 cat > "$LANZADOR" <<DESKTOP
 [Desktop Entry]
 Type=Application

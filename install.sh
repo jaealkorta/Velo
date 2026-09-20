@@ -13,7 +13,7 @@ AQUI=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DESTINO=/usr/share/sddm/themes/velo
 AJUSTES=/etc/sddm.conf.d/velo.conf
 # Lo que NO va a la carpeta del sistema: el editor gráfico, los scripts y las copias de seguridad.
-EXCLUIR=(--exclude=./gui --exclude=./docs --exclude=./install.sh --exclude=./test.sh --exclude=./velo-gui
+EXCLUIR=(--exclude=./gui --exclude=./docs --exclude=./install.sh --exclude=./instalar_app.sh --exclude=./test.sh --exclude=./velo-gui
          --exclude=./.git --exclude=./.gitignore --exclude='*.bak*' --exclude='*.gui-bak-*'
          --exclude=__pycache__ --exclude='*.pyc' --exclude='.velo-*' --exclude='*~')
 PAQUETES=(sddm qml6-module-qtquick-effects qml6-module-qtquick-controls qml6-module-qtquick-layouts
