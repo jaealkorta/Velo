@@ -50,6 +50,17 @@ v.show_all()
 resultado = {'ok': False, 'detalle': ''}
 
 
+_PRUEBAS = []
+
+
+def pruebas_globales():
+    return _PRUEBAS
+
+
+def leer_tema():
+    return velo_gui.velo_conf.ConfFile(tema / 'configs' / 'default.conf')
+
+
 def leer_sistema():
     return velo_gui.velo_conf.ConfFile(sistema / 'configs' / 'default.conf')
 
@@ -103,7 +114,32 @@ def paso4():
     assert leer_sistema().get('LockScreen.Clock', 'font-size') == '88'
     assert velo_sistema.diferencias(tema) == []
     assert not list(sistema.parent.glob('velo.*')), 'quedaron carpetas temporales'
-    resultado.update(ok=True, detalle='aviso cancelado, guardar+enviar, solo Aplicar, contraseña fallida, reintento')
+    # Probar: el aviso se cancela, y con un cambio pendiente guarda y abre la prueba
+    pruebas = _PRUEBAS
+    velo_sistema.probar = lambda origen, segundos=300: (pruebas.append(str(origen)), (True, 'Prueba cerrada.'))[1]
+    v.controles[('LockScreen.Clock', 'font-size')].spin.set_value(77)
+    registro['respuesta'] = Gtk.ResponseType.CANCEL
+    v.btn_probar.emit('clicked')
+    assert not pruebas and v._hay_cambios(), 'cancelar no debe guardar ni probar'
+    registro['respuesta'] = Gtk.ResponseType.OK
+    v.btn_probar.emit('clicked')
+    GLib.timeout_add(3500, envolver(paso5))
+
+
+def paso5():
+    assert len(pruebas_globales()) == 1
+    assert leer_tema().get('LockScreen.Clock', 'font-size') == '77', 'Probar debe guardar antes lo pendiente'
+    assert leer_sistema().get('LockScreen.Clock', 'font-size') == '88', 'Probar no debe tocar el sistema'
+    assert 'Prueba cerrada' in v.estado.get_text(), v.estado.get_text()
+    assert not v._hay_cambios() and v.btn_probar.get_sensitive() and not v.ocupado
+    # sin cambios pendientes: va directo
+    v.btn_probar.emit('clicked')
+    GLib.timeout_add(2500, envolver(paso6))
+
+
+def paso6():
+    assert len(pruebas_globales()) == 2
+    resultado.update(ok=True, detalle='aviso cancelado, guardar+enviar, solo Aplicar, contraseña fallida, reintento, probar')
     Gtk.main_quit()
 
 

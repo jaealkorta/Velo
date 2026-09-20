@@ -283,6 +283,51 @@ def probar_sistema():
     assert argv is None or argv[-3:] == ['bash', '-c', 'echo hola']
 
 
+def probar_vista_previa():
+    """velo_sistema.probar abre el greeter en modo de prueba y respeta cierre, tiempo y errores."""
+    import time
+    with tempfile.TemporaryDirectory() as d:
+        d = Path(d)
+        tema = d / 'tema'
+        _tema_falso(tema)
+        (tema / 'components').mkdir(exist_ok=True)
+        bin_ = d / 'bin'
+        bin_.mkdir()
+        registro = d / 'registro.txt'
+        falso = bin_ / 'sddm-greeter-qt6'
+
+        def escribir(cuerpo):
+            falso.write_text(f'#!/bin/sh\necho "$@ | $QML2_IMPORT_PATH | $QT_IM_MODULE | $(pwd)" > {registro}\n{cuerpo}\n')
+            falso.chmod(0o755)
+
+        anterior = os.environ['PATH']
+        os.environ['PATH'] = f'{bin_}:{anterior}'
+        try:
+            escribir('sleep 0.3')                                       # se cierra con normalidad
+            ok, msg = velo_sistema.probar(tema, segundos=20)
+            assert ok and 'cerrada' in msg, msg
+            linea = registro.read_text().strip()
+            assert linea.startswith(f'--test-mode --theme {tema.resolve()} |'), linea
+            assert f'{tema.resolve()}/components/ | qtvirtualkeyboard | {tema.resolve()}' in linea, linea
+
+            escribir('sleep 30')                                        # nadie la cierra: se cierra sola
+            t = time.monotonic()
+            ok, msg = velo_sistema.probar(tema, segundos=1)
+            assert ok and 'sola' in msg and time.monotonic() - t < 15, (msg, time.monotonic() - t)
+
+            escribir('exit 3')                                          # no llega a abrirse
+            ok, msg = velo_sistema.probar(tema, segundos=20)
+            assert not ok and 'no llegó a abrirse' in msg, msg
+        finally:
+            os.environ['PATH'] = anterior
+        os.environ['PATH'] = str(d / 'vacio')                           # sin greeter instalado
+        try:
+            ok, msg = velo_sistema.probar(tema, segundos=1)
+        finally:
+            os.environ['PATH'] = anterior
+        assert not ok and 'sddm-greeter-qt6' in msg, msg
+
+
 def probar_instalador_sistema():
     """install.sh y «Aplicar al sistema» deben llevar al sistema exactamente los mismos archivos."""
     raiz = Path(__file__).resolve().parents[2]
@@ -335,6 +380,7 @@ if __name__ == '__main__':
     probar_parametros()
     probar_plantillas()
     probar_sistema()
+    probar_vista_previa()
     probar_instalador_sistema()
     probar_instalador_menu()
     print('OK: todas las pruebas pasan')

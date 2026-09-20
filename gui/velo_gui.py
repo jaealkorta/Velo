@@ -569,6 +569,10 @@ class Ventana(Gtk.Window):
         self.btn_sistema = Gtk.Button(label='Aplicar al sistema')
         self.btn_sistema.set_tooltip_text('Lleva la configuración a la pantalla de inicio de sesión real (abre una terminal para pedir la contraseña).')
         self.btn_sistema.connect('clicked', self._al_aplicar_sistema)
+        self.btn_probar = Gtk.Button(label='Probar')
+        self.btn_probar.set_tooltip_text('Abre una vista previa de la pantalla de inicio con los ajustes guardados.')
+        self.btn_probar.connect('clicked', self._al_probar)
+        barra.pack_start(self.btn_probar, False, False, 0)
         barra.pack_start(self.btn_sistema, False, False, 0)
         barra.pack_start(self.estado, True, True, 0)
         for b in (self.btn_aceptar, self.btn_aplicar, self.btn_cerrar):   # orden habitual de KDE
@@ -742,6 +746,47 @@ class Ventana(Gtk.Window):
         return False
 
     # ---------- pantalla de inicio del sistema ----------
+    def _al_probar(self, _boton):
+        if self.ocupado:
+            return
+        pendiente = self._hay_cambios()
+        texto = ('Se abrirá una ventana con la pantalla de bloqueo y la de inicio de sesión tal como quedan '
+                 'con tus ajustes. No se puede iniciar sesión desde ahí: es solo una vista previa.\n\n'
+                 'Para cerrarla: pulsa Alt+F4 o la tecla Meta (Windows). Si no la cierras, se cierra sola '
+                 f'a los {velo_sistema.TIEMPO_PRUEBA // 60} minutos.\n\n'
+                 'Dentro de la prueba: cualquier tecla pasa del bloqueo al inicio de sesión y Esc vuelve.')
+        if pendiente:
+            texto += '\n\nAntes se guardarán los cambios pendientes (con copia de seguridad).'
+        dlg = Gtk.MessageDialog(transient_for=self, modal=True, message_type=Gtk.MessageType.INFO,
+                                text='Probar la pantalla de inicio', secondary_text=texto)
+        dlg.add_button('Cancelar', Gtk.ResponseType.CANCEL)
+        dlg.add_button('Probar', Gtk.ResponseType.OK)
+        respuesta = dlg.run()
+        dlg.destroy()
+        if respuesta != Gtk.ResponseType.OK:
+            return
+        if pendiente:
+            self._guardar(cerrar=False, luego=self._lanzar_prueba)
+        else:
+            self._lanzar_prueba()
+
+    def _lanzar_prueba(self):
+        self.ocupado = True
+        self._actualizar_botones()
+        self._estado('Prueba en marcha: ciérrala con Alt+F4 o la tecla Meta (Windows).')
+
+        def trabajo():
+            ok, mensaje = velo_sistema.probar(self.tema)
+            GLib.idle_add(self._prueba_terminada, ok, mensaje)
+        self.ejecutor.submit(trabajo)
+
+    def _prueba_terminada(self, ok, mensaje):
+        self.ocupado = False
+        self._actualizar_botones()
+        self.present()
+        self._estado(mensaje if ok else f'No se pudo probar: {mensaje}')
+        return False
+
     def _comprobar_sistema(self):
         self._estado(velo_sistema.texto_estado(velo_sistema.diferencias(self.tema)))
         return False
@@ -796,6 +841,7 @@ class Ventana(Gtk.Window):
         self.btn_aplicar.set_sensitive(self._hay_cambios() and not self.ocupado)
         self.btn_aceptar.set_sensitive(not self.ocupado)
         self.btn_sistema.set_sensitive(not self.ocupado)
+        self.btn_probar.set_sensitive(not self.ocupado)
         hay = self._hay_slideshow()
         self.caja_intervalo.set_sensitive(hay)
         self.lbl_intervalo.set_text(

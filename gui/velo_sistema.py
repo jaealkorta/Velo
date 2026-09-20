@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+import time
 from pathlib import Path
 
 DESTINO = Path('/usr/share/sddm/themes/velo')
@@ -20,6 +21,7 @@ EXCLUIR_PATRONES = ('*.bak*', '*.gui-bak-*', '__pycache__', '*.pyc', '.velo-*', 
 MAX_BYTES = 500 * 1024 * 1024
 LIMITE_LECTURA = 1_048_576      # por encima de esto, al comparar se mira solo tamaño y fecha
 TITULO_TERMINAL = 'Velo — permiso de administrador'
+TIEMPO_PRUEBA = 300               # segundos; pasado ese tiempo la ventana de prueba se cierra sola
 
 
 class ErrorVelo(Exception):
@@ -223,3 +225,36 @@ def aplicar(origen):
         return False, 'La pantalla de inicio no se actualizó (¿contraseña incorrecta o ventana cerrada?).'
     finally:
         shutil.rmtree(trabajo, ignore_errors=True)
+
+
+def probar(origen, segundos=TIEMPO_PRUEBA):
+    """Abre la pantalla de inicio en modo de prueba (sin poder entrar) y espera a que se cierre.
+
+    Se ve el tema de la carpeta de trabajo con lo que haya guardado en su configuración. Devuelve
+    (ok, mensaje). Si nadie la cierra, se cierra sola a los `segundos`.
+    """
+    origen = Path(origen).resolve()
+    greeter = shutil.which('sddm-greeter-qt6')
+    if greeter is None:
+        return False, 'No encuentro sddm-greeter-qt6 (viene con el paquete sddm).'
+    entorno = dict(os.environ, QT_IM_MODULE='qtvirtualkeyboard',
+                   QML2_IMPORT_PATH=str(origen / 'components') + '/')
+    inicio = time.monotonic()
+    try:
+        proceso = subprocess.Popen([greeter, '--test-mode', '--theme', str(origen)], cwd=origen, env=entorno,
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except OSError as e:
+        return False, f'No se pudo abrir la prueba: {e}'
+    try:
+        codigo = proceso.wait(timeout=segundos)
+    except subprocess.TimeoutExpired:
+        proceso.terminate()
+        try:
+            proceso.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proceso.kill()
+            proceso.wait()
+        return True, f'La prueba se cerró sola a los {segundos // 60 or 1} min.'
+    if codigo != 0 and time.monotonic() - inicio < 4:
+        return False, f'La prueba no llegó a abrirse (código {codigo}). Prueba desde una terminal: ./test.sh'
+    return True, 'Prueba cerrada.'
