@@ -42,7 +42,7 @@ ejecutar() {   # enseña el comando y, si no es una simulación, lo ejecuta
 if [[ "${1:-}" == "--quitar" ]]; then
     echo "Quitando Velo…"
     ejecutar sudo rm -f "$AJUSTES"
-    ejecutar sudo rm -rf "$DESTINO"
+    ejecutar sudo rm -rf "$DESTINO" "$DESTINO.nuevo" "$DESTINO.anterior"
     echo "Hecho. SDDM vuelve al tema que tuvieras antes (en KDE, el de /etc/sddm.conf.d/kde_settings.conf)."
     exit 0
 fi
@@ -69,14 +69,17 @@ if [[ -n "$ENLACES" ]]; then
 fi
 
 echo "2. Copiando el tema a $DESTINO"
-ejecutar sudo rm -rf "$DESTINO"
-ejecutar sudo install -d -m 755 "$DESTINO"
+# Se prepara al lado y se cambia de golpe: si algo falla antes, el tema instalado sigue intacto.
+NUEVO=$DESTINO.nuevo
+ejecutar sudo rm -rf "$NUEVO" "$DESTINO.anterior"
+ejecutar sudo install -d -m 755 "$NUEVO"
 if [[ $SIMULAR -eq 1 ]]; then
-    echo "  \$ tar -C $AQUI ${EXCLUIR[*]} -cf - . | sudo tar -C $DESTINO --no-same-owner -xf -"
+    echo "  \$ tar -C $AQUI ${EXCLUIR[*]} -cf - . | sudo tar -C $NUEVO --no-same-owner -xf -"
 else
-    tar -C "$AQUI" "${EXCLUIR[@]}" -cf - . | sudo tar -C "$DESTINO" --no-same-owner -xf -
+    tar -C "$AQUI" "${EXCLUIR[@]}" -cf - . | sudo tar -C "$NUEVO" --no-same-owner -xf -
 fi
-ejecutar sudo chmod -R a+rX "$DESTINO"
+ejecutar sudo chmod -R a+rX "$NUEVO"
+ejecutar sudo sh -c "if [ -e '$DESTINO' ]; then mv '$DESTINO' '$DESTINO.anterior'; fi; mv '$NUEVO' '$DESTINO'; rm -rf '$DESTINO.anterior'"
 
 echo "3. Activándolo ($AJUSTES)"
 # Un archivo aparte, que SDDM lee después de kde_settings.conf: no se toca la configuración de KDE.
