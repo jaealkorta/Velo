@@ -1,86 +1,79 @@
 # Velo
 
-*A personal SDDM login theme for KDE Plasma (Windows 11-style lock screen with video background). Derived from SilentSDDM. English summary at the end.*
+**A login screen for KDE Plasma (SDDM) with a Windows 11-style lock screen: big clock, soft gradients, a video, an image or a slideshow as background — and a graphical app to change everything without editing text files.**
 
-## De dónde surge
+*[Leer en español](README.es.md)*
 
-Un velo es una cortina fina que cubre algo hasta que decides apartarla. Eso es esta pantalla: lo primero que ves al encender el ordenador, antes de entrar a tu escritorio.
+![Lock screen](docs/img/lock.jpg)
 
-Nació de una idea sencilla: la pantalla de inicio de Debian con KDE Plasma es funcional pero sosa, y quería algo parecido a la de Windows 11, pero mejor: con un vídeo de fondo, con la hora grande y limpia, y que se lea bien con cualquier fondo.
+| Login screen | Login screen, "Card" preset |
+|---|---|
+| ![Login screen](docs/img/login.jpg) | ![Login screen with card](docs/img/login-card.jpg) |
 
-No empecé de cero. Velo parte de [SilentSDDM](https://github.com/uiriansan/SilentSDDM), un tema de código abierto de uiriansan. Yo lo he personalizado a mi gusto, y todo el mérito de la base es suyo.
+*Screenshots taken with the theme's own test mode (`sddm-greeter-qt6 --test-mode`) over a generated wallpaper.*
 
-## Para qué sirve
+## Features
 
-Es la pantalla que aparece antes de iniciar sesión. Tiene dos partes:
+- **Lock screen** in the style of Windows 11: large clock and date, "Press any key" message, and soft dark gradients at the top and bottom so the white text is readable over any background (no drop shadows).
+- **Login screen** without clutter: photo, name and password field, with session, keyboard layout, on-screen keyboard and power buttons.
+- **Backgrounds:** an image, a video (mp4, webm, mkv…) or a folder of images that change by themselves. Blur, brightness and saturation per screen.
+- **Configuration app** ("Configuraciones de VELO", in Spanish): General, Background, Language, and a group of pages for each screen (Lock / Login). It writes the config file for you, always keeping a backup.
+- **Presets:** Windows 11, Card, Minimalist.
+- **43 languages** for the theme's own texts (date and day names come from Qt). The translations are machine-written and unreviewed by native speakers: expect mistakes.
+- **Modular:** the pieces (`Scrim`, `LoginCard`, `LoginHeader`…) are separate QML files, so changing one does not break another.
 
-- **Pantalla de bloqueo:** el fondo (imagen, vídeo o pase de imágenes), la hora y la fecha en grande, y el mensaje «Pulse cualquier tecla».
-- **Pantalla de inicio de sesión:** tu foto, tu nombre y el campo de contraseña, con los botones de sesión, teclado, idioma y apagado.
+## Requirements
 
-Es de uso personal. No busca vender nada ni ganar dinero.
+- SDDM 0.21 or newer with Qt 6, and KDE Plasma.
+- For the install script: Debian, Ubuntu or a derivative (`apt`). On other distributions copy the theme by hand (see *How it works*).
+- For the app: Python 3 with GTK 3 (`python3-gi`, `gir1.2-gtk-3.0`) and `ffmpeg` (video thumbnails).
 
-## Cómo se cambia, en simple
+Tested only on one machine: Debian 13, KDE Plasma 6.3, Wayland.
 
-Con una aplicación con ventanas y botones: **Configuraciones de VELO**. No hace falta editar ningún texto.
+## Install
 
-El menú de la izquierda va de lo general a lo concreto:
+```bash
+git clone https://github.com/jaealkorta/Velo.git
+cd Velo
+./test.sh                  # preview the theme without installing anything
+./install.sh --simular     # show what the installer would do (dry run)
+./install.sh               # install and activate
+./gui/instalar_app.sh      # optional: put the configuration app in the applications menu
+```
 
-- **General:** tamaño de todo, animaciones, fuente y **plantillas** (puntos de partida: Windows 11, Tarjeta, Minimalista).
-- **Fondo:** elegir un archivo (imagen o vídeo) o una carpeta de imágenes que cambian solas.
-- **Bloqueo:** hora, fecha, mensaje, efectos del fondo (desenfoque, brillo, saturación) y degradados.
-- **Inicio de sesión:** recuadro, hora y fecha, usuario y contraseña, efectos del fondo, degradado y botones.
-- **Idioma:** por defecto el de tu sistema; se puede elegir otro.
+The installer installs missing packages, copies the theme to `/usr/share/sddm/themes/velo` and activates it with a separate file, `/etc/sddm.conf.d/velo.conf`. It does not touch KDE's own configuration.
 
-Cada pantalla tiene sus propios valores: cambiar el desenfoque del bloqueo no toca el del inicio de sesión.
+**Uninstall / roll back:** `./install.sh --quitar`. If the login screen does not show up, from another console (`Ctrl+Alt+F3`): `sudo rm /etc/sddm.conf.d/velo.conf`.
 
-Al pulsar **Aplicar** se guarda en la carpeta del tema (siempre con copia de seguridad). Para que lo vea la pantalla de inicio de verdad, **Aplicar al sistema**: abre una terminal, pide tu contraseña de administrador (sin ella no se puede cambiar) y se cierra sola.
+> Always run `./test.sh` before rebooting. If the theme is broken you could end up with a broken login screen.
 
-Por debajo, todo lo que se ve se decide en un archivo de texto: `configs/default.conf`. La aplicación solo lo edita por ti.
+## The configuration app
 
-Para que la hora se lea sobre cualquier fondo, no uso sombras: pongo un degradado oscuro muy suave arriba y abajo.
+Open it from the menu or with `./velo-gui`.
 
-## Instalarlo (Debian, Ubuntu y derivadas con KDE Plasma)
+![Configuration app: General](docs/img/gui-general.png)
 
-1. **Ver cómo queda sin instalar nada:** `./test.sh`
-2. **Instalarlo:** `./install.sh` (con `./install.sh --simular` enseña lo que haría sin tocar nada). Instala los paquetes que falten, copia el tema a `/usr/share/sddm/themes/velo` y lo activa con un archivo aparte, `/etc/sddm.conf.d/velo.conf`, sin tocar la configuración de KDE.
-3. **La aplicación en el menú:** `./gui/instalar_app.sh` (solo para tu usuario, sin permisos de administrador). Si no, se abre con `./velo-gui`.
+- **Apply** saves to the theme folder (a backup of the config is made each time).
+- **Apply to system** copies the theme to the folder SDDM reads. Changing it needs administrator rights, so the app first says so, then opens a terminal where you type your password; the terminal closes by itself. Nothing runs as root except `tar`, `mv` and similar system tools reading a package the app prepares.
+- Backgrounds are copied into the theme's `backgrounds/` folder: the login screen cannot read your home directory.
 
-Necesita Python 3 con GTK 3 (`python3-gi` y `gir1.2-gtk-3.0`) para la aplicación, y `ffmpeg` para las miniaturas de vídeo.
+Everything the app does ends up in one text file, `configs/default.conf`, which you can also edit by hand. `configs/presets/` holds the presets (partial config files).
 
-**Volver atrás:** `./install.sh --quitar`. Si la pantalla de inicio no llegara a verse, desde otra consola (`Ctrl+Alt+F3`): `sudo rm /etc/sddm.conf.d/velo.conf`.
+## Backgrounds
 
-Antes de reiniciar, prueba siempre con `./test.sh`. Si no, podrías quedarte con una pantalla de inicio rota.
+Images (jpg, png) and videos (mp4, webm, mkv, mov, avi). For a login screen a light video works best: 1080p, 30 fps, a few megabytes. **This repository ships no videos or wallpapers** except a fallback image (`backgrounds/default.jpg`): bring your own.
 
-## Los fondos
+## How it works
 
-Se admiten imágenes (jpg, png) y vídeos (mp4, webm, mkv, mov, avi). El tema solo puede leer los que están en su carpeta `backgrounds/`, así que la aplicación los copia allí al aplicar (el sistema de inicio de sesión no puede leer tu carpeta personal).
+- `Main.qml` builds the two screens and the background; `components/` has the pieces.
+- `configs/default.conf` is the configuration; only the keys read in `components/Config.qml` have effect.
+- `gui/` is the app (Python + GTK 3). Tests: `python3 gui/tests/test_basico.py` (the window tests need a virtual display, see the header of each file in `gui/tests/`).
+- To install by hand: copy this folder (without `gui/`, `docs/` and the scripts) to `/usr/share/sddm/themes/velo`, set `Current=velo` in a file under `/etc/sddm.conf.d/`, and make sure the greeter has `QML2_IMPORT_PATH=/usr/share/sddm/themes/velo/components/` and `QT_IM_MODULE=qtvirtualkeyboard` in `GreeterEnvironment`.
 
-Para una pantalla de inicio conviene un vídeo ligero: 1080p, 30 fps y pocos megas. Con uno pesado tarda en arrancar.
+## How it was made
 
-**Este repositorio no incluye ningún vídeo ni imagen de fondo** salvo una de reserva (`backgrounds/default.jpg`): cada uno pone los suyos.
+Velo is a personal project by Jae Alkorta. **All the changes on top of SilentSDDM were written 100 % by Claude** (Anthropic's AI assistant, through Claude Code): the QML changes, the configuration app, the installer, the presets, the translations, the tests and this documentation. Jae set the design, tested it on their own laptop and approved each step. The base theme is the work of uiriansan and its contributors and is not part of that claim.
 
-## Cómo está hecho
+## Credits and license
 
-Para que cambiar una parte no rompa otra:
-
-- `Main.qml` monta las dos pantallas y el fondo; `components/` tiene las piezas (`LockScreen`, `LoginScreen`, `LoginCard`, `LoginHeader`, `Scrim`, botones…).
-- `configs/default.conf` es la configuración; `configs/presets/` guarda las plantillas.
-- `gui/` es la aplicación (Python + GTK 3). Tiene pruebas en `gui/tests/`.
-
-## A dónde voy
-
-Hecho: pantalla de bloqueo estilo Windows 11 con vídeo, inicio de sesión limpio, aplicación de configuración completa con plantillas, idiomas y «Aplicar al sistema».
-
-Ideas para más adelante: aligerar el vídeo de ejemplo y revisar las traducciones (las hizo una máquina, sin revisión de personas nativas; las de euskera, francés, alemán, etc. pueden tener errores).
-
-## English summary
-
-Velo is a personal SDDM theme for KDE Plasma 6 on Debian/Ubuntu: a Windows 11-style lock screen (big clock, date, "Press any key") over an image, a video or an image slideshow, with soft dark gradients so the text stays readable, and a clean login screen. It comes with a GTK 3 configuration app ("Configuraciones de VELO", Spanish UI) that edits everything without touching text files, ships three presets, and translates the theme's texts into the 43 languages SDDM supports (machine-written, unreviewed).
-
-Install: `./test.sh` to preview, `./install.sh` (Debian/Ubuntu; `--simular` for a dry run, `--quitar` to remove it). The repository contains no videos and no wallpapers apart from a fallback image.
-
-## Créditos y licencia
-
-Velo es una versión modificada de SilentSDDM 1.5.0, de uiriansan, y usa la misma licencia: GPL-3.0-or-later. Puedes usarlo, cambiarlo y compartirlo con quien quieras, siempre que mantengas esa licencia y el crédito al autor original. Los detalles están en `NOTICE` y `LICENSE`.
-
-Las fuentes de `fonts/` (Red Hat) van con su licencia SIL Open Font License (`fonts/OFL.txt`).
+Velo is a modified version of [SilentSDDM](https://github.com/uiriansan/SilentSDDM) 1.5.0 by uiriansan, and uses the same license: **GPL-3.0-or-later**. You can use, change and share it as long as you keep that license and the credit to the original author. See `NOTICE` and `LICENSE`. The fonts in `fonts/` (Red Hat) come with their own SIL Open Font License (`fonts/OFL.txt`).

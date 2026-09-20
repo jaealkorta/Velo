@@ -199,6 +199,8 @@ def _tema_falso(raiz):
     (raiz / 'configs' / 'default.conf.bak-20260920').write_text('copia')
     (raiz / 'backgrounds').mkdir()
     (raiz / 'backgrounds' / 'a.jpg').write_bytes(b'x' * 100)
+    (raiz / 'docs' / 'img').mkdir(parents=True)
+    (raiz / 'docs' / 'img' / 'captura.jpg').write_text('x')
     (raiz / 'gui').mkdir()
     (raiz / 'gui' / 'velo_gui.py').write_text('x')
     for nombre in ('install.sh', 'test.sh', 'velo-gui', '.gitignore'):

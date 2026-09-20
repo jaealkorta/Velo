@@ -14,8 +14,8 @@ import tempfile
 from pathlib import Path
 
 DESTINO = Path('/usr/share/sddm/themes/velo')
-# Lo que NO va al sistema: el editor gráfico, los scripts de instalación y las copias de seguridad.
-EXCLUIR_RAIZ = {'gui', 'install.sh', 'test.sh', 'velo-gui', '.git', '.gitignore'}
+# Lo que NO va al sistema: el editor gráfico, las capturas de la documentación, los scripts y las copias.
+EXCLUIR_RAIZ = {'gui', 'docs', 'install.sh', 'test.sh', 'velo-gui', '.git', '.gitignore'}
 EXCLUIR_PATRONES = ('*.bak*', '*.gui-bak-*', '__pycache__', '*.pyc', '.velo-*', '*~')
 MAX_BYTES = 500 * 1024 * 1024
 LIMITE_LECTURA = 1_048_576      # por encima de esto, al comparar se mira solo tamaño y fecha

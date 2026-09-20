@@ -23,7 +23,7 @@ import velo_idiomas   # noqa: E402
 CONF = 'configs/default.conf'
 FORMATO_FECHA_EN = 'dddd, MMMM d, yyyy'
 LIMITE_ARCHIVO = 1_500_000        # bytes; las fuentes (OFL) son lo único que se acerca
-PROHIBIDO_EN_EL_CONTENIDO = ('/home/', 'jalkorta', 'jaealkorta', 'Alkorta')
+PROHIBIDO_EN_EL_CONTENIDO = ('/home/', 'jalkorta', 'jaealkorta', 'Alkorta')   # salvo en los README: allí van la autoría y la URL del repositorio
 EXTENSIONES_PROHIBIDAS = ('.mp4', '.webm', '.mkv', '.avi', '.mov')
 
 
@@ -73,7 +73,7 @@ def main():
             problemas.append(f'{ruta}: es una copia de seguridad')
         contenido = subprocess.run(['git', '-C', str(RAIZ), 'cat-file', 'blob', objeto], capture_output=True).stdout
         for texto in PROHIBIDO_EN_EL_CONTENIDO:
-            if texto.encode() in contenido and not ruta.startswith(('LICENSE', 'fonts/', 'gui/preparar_github.py')):
+            if texto.encode() in contenido and not ruta.startswith(('LICENSE', 'fonts/', 'README', 'gui/preparar_github.py')):
                 problemas.append(f'{ruta}: contiene «{texto}»')
                 break
     total = sum(int(git('cat-file', '-s', i.split()[1]).strip()) for i, _r in ficheros)
