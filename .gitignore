@@ -1,0 +1,16 @@
+# Cachés de Python
+__pycache__/
+*.pyc
+
+# Copias de seguridad de la configuración (las hace la GUI y a mano)
+*.bak
+*.bak-*
+*.gui-bak-*
+
+# Fondos: solo se sube el de reserva. Los vídeos e imágenes de cada uno son suyos (y pesan).
+backgrounds/*
+!backgrounds/default.jpg
+!backgrounds/extract_first_frame.sh
+
+# Restos de compilación (Nix) que traía la base
+result*

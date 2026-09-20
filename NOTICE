@@ -1,0 +1,26 @@
+Velo
+====
+Velo is a modified version of SilentSDDM 1.5.0
+  Original work: Copyright (C) uiriansan and contributors
+  Source:        https://github.com/uiriansan/SilentSDDM
+  License:       GNU General Public License v3.0 or later (see LICENSE)
+
+Modifications (2026-09-19 to 2026-09-21):
+  - Renamed theme to "Velo" (Theme-Id "velo").
+  - Lock screen: top/bottom gradient scrims, outline options, message icon on one line.
+  - Login screen: optional translucent card, bottom scrim, clock/date options.
+  - Split into smaller modules: components/Scrim.qml, LoginCard.qml, LoginHeader.qml.
+  - New keys in configs/default.conf and components/Config.qml (scrims, card, slideshow-interval,
+    the six [Tooltips] texts, ...).
+  - Background slideshow: `background` may list several images separated by `|` and they rotate
+    every `slideshow-interval` seconds (Main.qml, components/Config.qml).
+  - Translations of the theme's own texts into the languages SDDM ships (gui/velo_idiomas.py).
+  - Presets in configs/presets/ (partial configuration files).
+  - Added gui/ (graphical editor for the config, Python + GTK 3, "Apply to system" through a
+    terminal with sudo) and backgrounds/default.jpg (own generated fallback image).
+  - Debian/Ubuntu install.sh (drop-in /etc/sddm.conf.d/velo.conf) replaces the original one.
+  - Removed Nix packaging, docs and the original extra presets.
+
+This derivative is distributed under the same license (GPL-3.0-or-later).
+The original copyright notices and licenses must be kept: LICENSE, LICENSE-TIFF,
+LICENSE-WEBP and fonts/OFL.txt (Red Hat fonts, SIL Open Font License).

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Abre el editor gráfico de Velo (usa la carpeta donde está este script).
+exec python3 "$(dirname "$(readlink -f "$0")")/gui/velo_gui.py" "$@"

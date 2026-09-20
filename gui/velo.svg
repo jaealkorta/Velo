@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b4a72"/>
+      <stop offset="1" stop-color="#14161f"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="26" fill="url(#fondo)"/>
+  <!-- velo: dos ondas translúcidas -->
+  <path d="M8 84 C36 68 62 100 92 84 S112 78 120 80 V94 a26 26 0 0 1 -26 26 H34 a26 26 0 0 1 -26 -26 Z"
+        fill="#ffffff" fill-opacity="0.16"/>
+  <path d="M8 98 C34 86 64 112 94 98 S112 94 120 96 V94 a26 26 0 0 1 -26 26 H34 a26 26 0 0 1 -26 -26 Z"
+        fill="#ffffff" fill-opacity="0.24"/>
+  <!-- candado -->
+  <path d="M45 56 v-9 a19 19 0 0 1 38 0 v9" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+  <rect x="36" y="54" width="56" height="38" rx="10" fill="#ffffff"/>
+  <circle cx="64" cy="71" r="5" fill="#2a3352"/>
+  <rect x="61.5" y="72" width="5" height="11" rx="2.5" fill="#2a3352"/>
+</svg>

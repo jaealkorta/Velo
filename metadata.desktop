@@ -1,0 +1,15 @@
+; Velo: derivative of SilentSDDM by uiriansan (GPL-3.0-or-later). See NOTICE.
+
+[SddmGreeterTheme]
+Name=Velo
+Type=sddm-theme
+Description=Personal SDDM theme with a Windows 11 style lock screen and video background.
+License=GPL-3.0-or-later
+Version=0.1.0
+Theme-Id=velo
+Theme-API=2.0
+MainScript=Main.qml
+TranslationsDirectory=translations
+QtVersion=6
+
+ConfigFile=configs/default.conf
