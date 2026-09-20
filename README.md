@@ -49,6 +49,8 @@ cd Velo
 
 El instalador añade los paquetes que falten, copia el tema a `/usr/share/sddm/themes/velo` y lo activa mediante un archivo independiente, `/etc/sddm.conf.d/velo.conf`, sin modificar la configuración propia de KDE.
 
+Conviene dejar la carpeta en un sitio fijo (por ejemplo, `~/Programas/Velo`) y no en Descargas: el icono del menú y la aplicación apuntan a ella. Si la mueves, vuelve a ejecutar `./instalar_app.sh` para que apunte al sitio nuevo.
+
 **Desinstalación:** `./install.sh --quitar`. Si la pantalla de inicio no llegara a mostrarse, desde otra consola (`Ctrl+Alt+F3`): `sudo rm /etc/sddm.conf.d/velo.conf`.
 
 > Se recomienda ejecutar siempre `./test.sh` antes de reiniciar: un tema defectuoso puede dejar la pantalla de inicio inutilizable.
@@ -59,6 +61,7 @@ Se abre desde el menú de aplicaciones o con `./velo-gui`.
 
 ![Aplicación de configuración: General](docs/img/gui-general.png)
 
+- **Probar** abre una vista previa de la pantalla de bloqueo y de inicio de sesión con los ajustes guardados (los pendientes se guardan antes). No permite iniciar sesión. Se cierra con `Alt+F4` o la tecla Meta (Windows), y sola a los 5 minutos.
 - **Aplicar** guarda los cambios en la carpeta del tema y crea una copia de seguridad de la configuración.
 - **Aplicar al sistema** copia el tema a la carpeta que lee SDDM. Esa operación requiere permisos de administrador: la aplicación lo indica, abre una terminal donde se introduce la contraseña y la cierra al terminar. Con permisos de administrador solo se ejecutan herramientas del sistema (`tar`, `mv`, etc.) que leen un paquete preparado por la aplicación.
 - Los fondos se copian a la carpeta `backgrounds/` del tema, porque la pantalla de inicio no puede acceder al directorio personal del usuario.
