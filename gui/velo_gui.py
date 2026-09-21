@@ -684,6 +684,9 @@ class Ventana(Gtk.Window):
                 self.marcador_fallido = bool(video) and not marcador
                 self.conf.set('General', 'animated-background-placeholder', marcador)
                 self.conf.set('General', 'background-fill-mode', modo)
+                principal = velo_pantallas.principal_de_kde()
+                if principal:
+                    self.conf.set('General', 'primary-screen', principal)
                 for seccion, clave, valor, entre_comillas in parametros:
                     self.conf.set(seccion, clave, valor, texto=entre_comillas)
                 if any(len(lista) > 1 for lista in nombres.values()):
@@ -791,9 +794,17 @@ class Ventana(Gtk.Window):
         self._estado(velo_sistema.texto_estado(velo_sistema.diferencias(self.tema)))
         return False
 
+    def _seguir_pantalla_principal(self):
+        """Apunta en la configuración la pantalla principal de KDE (el inicio de sesión sale en esa)."""
+        nombre = velo_pantallas.principal_de_kde()
+        if nombre and self.conf.get('General', 'primary-screen', '') != nombre:
+            self.conf.set('General', 'primary-screen', nombre)
+            self.conf.guardar()
+
     def _al_aplicar_sistema(self, _boton):
         if self.ocupado:
             return
+        self._seguir_pantalla_principal()
         dlg = Gtk.MessageDialog(
             transient_for=self, modal=True, message_type=Gtk.MessageType.QUESTION,
             text='Cambiar la pantalla de inicio necesita permiso de administrador',

@@ -50,7 +50,7 @@ cd Velo
 
 El instalador añade los paquetes que falten, copia el tema a `/usr/share/sddm/themes/velo` y lo activa mediante un archivo independiente, `/etc/sddm.conf.d/velo.conf`, sin modificar la configuración propia de KDE. Si hay KWin (Plasma), la pantalla de inicio se ejecuta en Wayland, igual que la sesión.
 
-**Varias pantallas:** el inicio de sesión aparece solo en la pantalla principal; las demás muestran únicamente el fondo. Para que la disposición y la pantalla principal sean las de KDE, pulsa una vez *Preferencias del sistema → Colores y temas → Pantalla de inicio de sesión (SDDM) → «Aplicar ajustes de Plasma…»* (y repítelo si cambias la disposición).
+**Varias pantallas:** el inicio de sesión aparece solo en la pantalla principal de KDE (la aplicación la guarda en `primary-screen`); las demás muestran únicamente el fondo. Si esa pantalla no está conectada, se usa la que SDDM considere principal. Para que la disposición y la pantalla principal sean las de KDE, pulsa una vez *Preferencias del sistema → Colores y temas → Pantalla de inicio de sesión (SDDM) → «Aplicar ajustes de Plasma…»* (y repítelo si cambias la disposición).
 
 Conviene dejar la carpeta en un sitio fijo (por ejemplo, `~/Programas/Velo`) y no en Descargas: el icono del menú y la aplicación apuntan a ella. Si la mueves, vuelve a ejecutar `./instalar_app.sh` para que apunte al sitio nuevo.
 

@@ -14,10 +14,22 @@ Item {
         id: textConstants
     }
 
-    // SDDM abre una ventana por pantalla y cada una carga su propio Main.qml con un
-    // `screenModel` que solo contiene SU pantalla; `primary` vale -1 si no es la principal.
-    // Solo la principal (la de KDE) muestra bloqueo e inicio de sesión; las demás, el fondo.
-    property bool esPrincipal: screenModel.primary >= 0
+    // SDDM abre una ventana por pantalla y cada una carga su propio Main.qml. Solo la pantalla principal
+    // muestra bloqueo e inicio de sesión; las demás, el fondo. La principal es la de KDE (`primary-screen`);
+    // Qt/KWin llaman «principal» a la primera que anuncian, que no siempre es la de KDE. Si esa pantalla no
+    // está conectada (o no se ha configurado), se usa la de SDDM: cada ventana tiene un `screenModel` con
+    // solo SU pantalla y `primary` vale -1 si no es la principal.
+    property bool esPrincipal: {
+        var nombre = Config.primaryScreen;
+        if (nombre !== "") {
+            var pantallas = Qt.application.screens;
+            for (var i = 0; i < pantallas.length; i++) {
+                if (pantallas[i].name === nombre)
+                    return Screen.name === nombre;
+            }
+        }
+        return screenModel.primary >= 0;
+    }
 
     // En la prueba (`--test-mode`) cada pantalla es una ventana normal y cada una tiene su propio motor QML,
     // así que no pueden cerrarse entre sí. Al cerrar una (Alt+F4) se escribe una marca que vigilan
