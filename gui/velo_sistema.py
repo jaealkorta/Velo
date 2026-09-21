@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -21,6 +22,7 @@ EXCLUIR_PATRONES = ('*.bak*', '*.gui-bak-*', '__pycache__', '*.pyc', '.velo-*', 
 MAX_BYTES = 500 * 1024 * 1024
 LIMITE_LECTURA = 1_048_576      # por encima de esto, al comparar se mira solo tamaño y fecha
 TITULO_TERMINAL = 'Velo — permiso de administrador'
+MARCA_CIERRE = 'VELO_CERRAR_PRUEBA'   # la escribe Main.qml al cerrarse una ventana de la prueba
 TIEMPO_PRUEBA = 300               # segundos; pasado ese tiempo la ventana de prueba se cierra sola
 
 
@@ -242,9 +244,20 @@ def probar(origen, segundos=TIEMPO_PRUEBA):
     inicio = time.monotonic()
     try:
         proceso = subprocess.Popen([greeter, '--test-mode', '--theme', str(origen)], cwd=origen, env=entorno,
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                                   text=True, errors='replace')
     except OSError as e:
         return False, f'No se pudo abrir la prueba: {e}'
+    cerrada = threading.Event()
+
+    def vigilar():
+        # Cada pantalla es una ventana: cuando el tema avisa de que se ha cerrado una, se cierra la prueba entera.
+        for linea in proceso.stderr:
+            if MARCA_CIERRE in linea:
+                cerrada.set()
+                proceso.terminate()
+                break
+    threading.Thread(target=vigilar, daemon=True).start()
     try:
         codigo = proceso.wait(timeout=segundos)
     except subprocess.TimeoutExpired:
@@ -255,6 +268,8 @@ def probar(origen, segundos=TIEMPO_PRUEBA):
             proceso.kill()
             proceso.wait()
         return True, f'La prueba se cerró sola a los {segundos // 60 or 1} min.'
+    if cerrada.is_set():
+        return True, 'Prueba cerrada.'
     if codigo != 0 and time.monotonic() - inicio < 4:
         return False, f'La prueba no llegó a abrirse (código {codigo}). Prueba desde una terminal: ./test.sh'
     return True, 'Prueba cerrada.'

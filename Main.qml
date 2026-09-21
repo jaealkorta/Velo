@@ -19,6 +19,17 @@ Item {
     // Solo la principal (la de KDE) muestra bloqueo e inicio de sesión; las demás, el fondo.
     property bool esPrincipal: screenModel.primary >= 0
 
+    // En la prueba (`--test-mode`) cada pantalla es una ventana normal y cada una tiene su propio motor QML,
+    // así que no pueden cerrarse entre sí. Al cerrar una (Alt+F4) se escribe una marca que vigilan
+    // `test.sh` y el botón «Probar» de la aplicación, que cierran la prueba entera.
+    Connections {
+        target: root.Window.window
+        enabled: Qt.application.arguments.indexOf("--test-mode") !== -1
+        function onClosing() {
+            console.log("VELO_CERRAR_PRUEBA");
+        }
+    }
+
     property bool capsLockOn: false
     Component.onCompleted: {
         if (keyboard)
