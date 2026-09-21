@@ -3,6 +3,7 @@
 #
 #   ./install.sh             instala Velo y lo activa
 #   ./install.sh --simular   enseña lo que haría, sin tocar nada
+#   ./install.sh --x11       fuerza que la pantalla de inicio use X11 (por defecto: Wayland si hay KWin)
 #   ./install.sh --quitar    quita Velo y vuelve al tema anterior
 #
 # Pide la contraseña (sudo) cuando hace falta. No lo ejecutes ya con sudo.
@@ -22,12 +23,16 @@ PAQUETES=(sddm qml6-module-qtquick-effects qml6-module-qtquick-controls qml6-mod
           qt6-image-formats-plugins)
 
 SIMULAR=0
-case "${1:-}" in
-    "" ) ;;
-    --simular) SIMULAR=1 ;;
-    --quitar) ;;
-    *) echo "Opción desconocida: $1 (usa --simular o --quitar)" >&2; exit 1 ;;
-esac
+X11=0
+QUITAR=0
+for opcion in "$@"; do
+    case "$opcion" in
+        --simular) SIMULAR=1 ;;
+        --x11) X11=1 ;;
+        --quitar) QUITAR=1 ;;
+        *) echo "Opción desconocida: $opcion (usa --simular, --x11 o --quitar)" >&2; exit 1 ;;
+    esac
+done
 
 if [[ $EUID -eq 0 ]]; then
     echo "No lo ejecutes como administrador: pide la contraseña él solo cuando hace falta." >&2
@@ -39,7 +44,7 @@ ejecutar() {   # enseña el comando y, si no es una simulación, lo ejecuta
     [[ $SIMULAR -eq 1 ]] || "$@"
 }
 
-if [[ "${1:-}" == "--quitar" ]]; then
+if [[ $QUITAR -eq 1 ]]; then
     echo "Quitando Velo…"
     ejecutar sudo rm -f "$AJUSTES"
     ejecutar sudo rm -rf "$DESTINO" "$DESTINO.nuevo" "$DESTINO.anterior"
@@ -84,11 +89,24 @@ ejecutar sudo sh -c "if [ -e '$DESTINO' ]; then mv '$DESTINO' '$DESTINO.anterior
 echo "3. Activándolo ($AJUSTES)"
 # Un archivo aparte, que SDDM lee después de kde_settings.conf: no se toca la configuración de KDE.
 IDIOMA=${LC_ALL:-${LANG:-}}
-ENTORNO="QML2_IMPORT_PATH=$DESTINO/components/,QT_IM_MODULE=qtvirtualkeyboard"
+# Con KWin (Plasma) la pantalla de inicio va en Wayland, igual que la sesión: KWin coloca cada
+# pantalla como en KDE y Velo muestra el inicio solo en la principal (las demás, el fondo).
+# Sin KWin, o con --x11, se queda en X11 con el teclado virtual de Qt.
+if [[ $X11 -eq 0 ]] && command -v kwin_wayland >/dev/null; then
+    ENTORNO="QML2_IMPORT_PATH=$DESTINO/components/,QT_WAYLAND_SHELL_INTEGRATION=layer-shell"
+    WAYLAND=1
+else
+    ENTORNO="QML2_IMPORT_PATH=$DESTINO/components/,QT_IM_MODULE=qtvirtualkeyboard"
+    WAYLAND=0
+fi
 if [[ -n "$IDIOMA" && "$IDIOMA" != C* && "$IDIOMA" != POSIX* ]]; then
     ENTORNO+=",LANG=$IDIOMA"     # los textos propios de SDDM (Contraseña, Apagar…) salen en tu idioma
 fi
-CONTENIDO=$(printf '[Theme]\nCurrent=velo\n\n[General]\nInputMethod=qtvirtualkeyboard\nGreeterEnvironment=%s\n' "$ENTORNO")
+if [[ $WAYLAND -eq 1 ]]; then
+    CONTENIDO=$(printf '[Theme]\nCurrent=velo\n\n[General]\nDisplayServer=wayland\nGreeterEnvironment=%s\n\n[Wayland]\nCompositorCommand=kwin_wayland --drm --no-lockscreen --no-global-shortcuts --locale1\n' "$ENTORNO")
+else
+    CONTENIDO=$(printf '[Theme]\nCurrent=velo\n\n[General]\nInputMethod=qtvirtualkeyboard\nGreeterEnvironment=%s\n' "$ENTORNO")
+fi
 if [[ -f "$AJUSTES" ]]; then
     ejecutar sudo cp -a "$AJUSTES" "$AJUSTES.bak"
 fi
@@ -101,4 +119,8 @@ fi
 
 echo
 echo "Listo. Verás Velo la próxima vez que cierres sesión o reinicies."
+if [[ $WAYLAND -eq 1 ]]; then
+    echo "Para que el inicio de sesión copie la disposición de tus pantallas de KDE: Preferencias del sistema →"
+    echo "Colores y temas → Pantalla de inicio de sesión (SDDM) → «Aplicar ajustes de Plasma…»."
+fi
 echo "Si algo sale mal: ./install.sh --quitar  (o, desde otra consola con Ctrl+Alt+F3: sudo rm $AJUSTES)"

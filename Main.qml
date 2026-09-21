@@ -14,6 +14,11 @@ Item {
         id: textConstants
     }
 
+    // SDDM abre una ventana por pantalla y cada una carga su propio Main.qml con un
+    // `screenModel` que solo contiene SU pantalla; `primary` vale -1 si no es la principal.
+    // Solo la principal (la de KDE) muestra bloqueo e inicio de sesión; las demás, el fondo.
+    property bool esPrincipal: screenModel.primary >= 0
+
     property bool capsLockOn: false
     Component.onCompleted: {
         if (keyboard)
@@ -229,6 +234,8 @@ Item {
             id: screenContainer
             anchors.fill: parent
             anchors.top: parent.top
+            visible: root.esPrincipal
+            enabled: root.esPrincipal
 
             LockScreen {
                 id: lockScreen

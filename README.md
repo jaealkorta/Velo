@@ -43,11 +43,14 @@ git clone https://github.com/jaealkorta/Velo.git
 cd Velo
 ./test.sh                # previsualiza el tema sin instalar nada
 ./install.sh --simular   # muestra lo que haría el instalador, sin ejecutar nada
-./install.sh             # instala y activa el tema
+./install.sh             # instala y activa el tema (Wayland con KWin si está disponible)
+./install.sh --x11       # alternativa: pantalla de inicio en X11
 ./instalar_app.sh        # opcional: añade la aplicación al menú de aplicaciones
 ```
 
-El instalador añade los paquetes que falten, copia el tema a `/usr/share/sddm/themes/velo` y lo activa mediante un archivo independiente, `/etc/sddm.conf.d/velo.conf`, sin modificar la configuración propia de KDE.
+El instalador añade los paquetes que falten, copia el tema a `/usr/share/sddm/themes/velo` y lo activa mediante un archivo independiente, `/etc/sddm.conf.d/velo.conf`, sin modificar la configuración propia de KDE. Si hay KWin (Plasma), la pantalla de inicio se ejecuta en Wayland, igual que la sesión.
+
+**Varias pantallas:** el inicio de sesión aparece solo en la pantalla principal; las demás muestran únicamente el fondo. Para que la disposición y la pantalla principal sean las de KDE, pulsa una vez *Preferencias del sistema → Colores y temas → Pantalla de inicio de sesión (SDDM) → «Aplicar ajustes de Plasma…»* (y repítelo si cambias la disposición).
 
 Conviene dejar la carpeta en un sitio fijo (por ejemplo, `~/Programas/Velo`) y no en Descargas: el icono del menú y la aplicación apuntan a ella. Si la mueves, vuelve a ejecutar `./instalar_app.sh` para que apunte al sitio nuevo.
 
@@ -79,7 +82,7 @@ Se admiten imágenes (jpg, png) y vídeos (mp4, webm, mkv, mov, avi). Para una p
 - `Main.qml` monta las dos pantallas y el fondo; `components/` contiene las piezas.
 - `configs/default.conf` es la configuración. Solo tienen efecto las claves que lee `components/Config.qml`.
 - `gui/` contiene la aplicación (Python y GTK 3) y sus pruebas (`gui/tests/`). Las pruebas de ventana requieren un servidor gráfico virtual; las instrucciones figuran en la cabecera de cada archivo.
-- Instalación manual: copiar la carpeta (sin `gui/`, `docs/` ni los scripts) a `/usr/share/sddm/themes/velo`, establecer `Current=velo` en un archivo de `/etc/sddm.conf.d/` y definir en `GreeterEnvironment` las variables `QML2_IMPORT_PATH=/usr/share/sddm/themes/velo/components/` y `QT_IM_MODULE=qtvirtualkeyboard`.
+- Instalación manual: copiar la carpeta (sin `gui/`, `docs/` ni los scripts) a `/usr/share/sddm/themes/velo`, establecer `Current=velo` en un archivo de `/etc/sddm.conf.d/` y definir en `GreeterEnvironment` la variable `QML2_IMPORT_PATH=/usr/share/sddm/themes/velo/components/`. Para Wayland con KWin: `DisplayServer=wayland`, `QT_WAYLAND_SHELL_INTEGRATION=layer-shell` en `GreeterEnvironment` y `CompositorCommand=kwin_wayland --drm --no-lockscreen --no-global-shortcuts --locale1` en `[Wayland]`; para X11: `InputMethod=qtvirtualkeyboard` y `QT_IM_MODULE=qtvirtualkeyboard`.
 
 ## Desarrollo y pruebas
 
